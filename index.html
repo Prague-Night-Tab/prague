@@ -1,0 +1,416 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Prague Events Tab</title>
+<meta name="theme-color" content="#2A1230">
+<meta name="description" content="What is on in Prague: Christmas markets, concerts, opera, exhibitions and skating, with dates, venues and published ticket prices.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#F7F3F0;--card:#FFFFFF;--ink:#1E1423;--mute:#675C6C;--line:#E0D6DE;--accent:#8B2B63;--onaccent:#FFFFFF;--soft:#F3E3EC;--warn:#9A5B00;--bad:#B3301F;--bar:#8B2B63}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#150E19;--card:#1F1626;--ink:#F1E9F3;--mute:#AC9FB1;--line:#36283C;--accent:#F08CC0;--onaccent:#2A0D1D;--soft:#2F1D38;--warn:#F2B04B;--bad:#F08A7A;--bar:#F08CC0;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#150E19;--card:#1F1626;--ink:#F1E9F3;--mute:#AC9FB1;--line:#36283C;--accent:#F08CC0;--onaccent:#2A0D1D;--soft:#2F1D38;--warn:#F2B04B;--bad:#F08A7A;--bar:#F08CC0;color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,system-ui,sans-serif}
+h1,h2,h3{font-family:'Space Grotesk',Inter,sans-serif;line-height:1.12;margin:0;text-wrap:balance}
+button,select,input{font:inherit;color:inherit}
+a{color:var(--accent)}
+.wrap{max-width:980px;margin:0 auto;padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top,0px)}
+.bar{display:flex;align-items:center;gap:10px;min-height:56px}
+.logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:18px;flex:1}
+.logo small{display:block;font:500 11px/1 Inter,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-top:3px}
+.ib{min-width:44px;min-height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:600}
+nav.tabs{display:flex;gap:6px;padding:0 0 10px;overflow-x:auto;scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;min-height:44px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-weight:500}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--onaccent);border-color:var(--accent);font-weight:600}
+main{padding:20px 0 96px}
+section[hidden]{display:none}
+.hero h1{font-size:clamp(30px,6vw,46px)}
+.hero p{color:var(--mute);max-width:60ch;margin:10px 0 0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:18px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.stat b{display:block;font:700 26px 'Space Grotesk',sans-serif}
+.stat span{font-size:13px;color:var(--mute)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.chip{min-height:40px;padding:0 14px;border-radius:99px;border:1px solid var(--line);background:var(--card);cursor:pointer;font-size:14px;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--soft);border-color:var(--accent);color:var(--ink);font-weight:600}
+.list{display:grid;gap:12px}
+.pv{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px}
+.pv h3{font-size:19px}
+.meta{font-size:13.5px;color:var(--mute);margin-top:3px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.pill{font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;border:1px solid var(--line);color:var(--mute)}
+.pill.g{background:var(--soft);color:var(--accent);border-color:transparent}
+.pill.w{color:var(--warn)}
+.price{font:700 20px 'Space Grotesk',sans-serif;text-align:right}
+.price small{display:block;font:500 12px Inter,sans-serif;color:var(--mute)}
+.btn{min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--line);background:var(--card);text-decoration:none;color:var(--ink);font-weight:600;font-size:14px;display:inline-flex;align-items:center;cursor:pointer}
+.btn.p{background:var(--accent);color:var(--onaccent);border-color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+td.n,th.n{text-align:right;white-space:nowrap}
+.tw{overflow-x:auto}
+.bars{display:grid;gap:10px}
+.br{display:grid;grid-template-columns:minmax(100px,170px) 1fr auto;gap:10px;align-items:center;font-size:13.5px}
+.br i{display:block;height:14px;border-radius:7px;background:var(--bar)}
+.br em{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums}
+.f{display:grid;gap:6px;margin:12px 0}
+.f label{font-size:13px;color:var(--mute);font-weight:500}
+.f select,.f input[type=number],.f input[type=search]{min-height:46px;border-radius:12px;border:1px solid var(--line);background:var(--bg);padding:0 12px;width:100%}
+.res{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.res .stat b{font-size:30px;color:var(--accent)}
+.note{font-size:12.5px;color:var(--mute);margin-top:10px}
+.sub{font-size:13px;color:var(--mute)}
+h2{font-size:24px;margin:26px 0 10px}
+.two{display:grid;gap:16px}
+@media(min-width:760px){.two{grid-template-columns:1fr 1fr}}
+.warnbox{border:1px solid var(--warn);border-radius:14px;padding:12px 14px;font-size:14px;margin:12px 0;background:var(--card)}
+.key{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px}
+.key b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}
+.cal .h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);text-align:center;padding:4px 0}
+.cd{min-height:52px;border-radius:10px;border:1px solid var(--line);background:var(--card);cursor:pointer;padding:4px 2px;text-align:center;font-size:14px}
+.cd small{display:block;font-size:11px;color:var(--accent);font-weight:700;min-height:14px}
+.cd.o{opacity:.35;cursor:default}
+.cd.t{border-color:var(--accent);font-weight:700}
+.cd[aria-pressed="true"]{background:var(--accent);color:var(--onaccent);border-color:var(--accent)}
+.cd[aria-pressed="true"] small{color:var(--onaccent)}
+.cn{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ck{display:flex;gap:10px;align-items:flex-start;min-height:44px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.ck input{width:22px;height:22px;margin-top:2px;flex:none}
+footer{font-size:12px;color:var(--mute);padding:20px 0}
+@media (prefers-reduced-motion:no-preference){.pv{transition:transform .12s}.pv:hover{transform:translateY(-1px)}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap">
+ <div class="bar"><div class="logo">Prague Events Tab<small>What's on &amp; what it costs</small></div><button class="ib" id="loc" aria-label="Use my location">Near me</button><button class="ib" id="th" aria-label="Switch light or dark theme">Theme</button></div>
+ <nav class="tabs" role="tablist" aria-label="Sections" id="tabs"></nav>
+</div></header>
+<main class="wrap">
+ <section id="s-find"></section>
+ <section id="s-cal" hidden></section>
+ <section id="s-tix" hidden></section>
+ <section id="s-plan" hidden></section>
+ <section id="s-about" hidden></section>
+ <footer>Dates, times and prices are a snapshot checked on 15 Nov 2026 from the sources listed under Sources. Events change, so confirm with the organiser before you go.</footer>
+</main>
+<script>
+const CHK='15 Nov 2026';
+const PE=['Prague Experience events list','https://www.pragueexperience.com/events/events.asp'];
+const EX=['Expats.cz Christmas markets guide (10 Nov, updated 12 Nov 2026)','https://www.expats.cz/czech-news/article/prague-christmas-markets-2026-when-they-open-and-where-to-go'];
+const EL=['Eventland Prague November','https://eventland.eu/prague/november/'];
+const NY=['Prague Experience New Year\'s Eve page','https://pragueexperience.com/events/new-years-eve.asp'];
+const IC=['Insight Cities winter 2026/27 in Prague','https://insightcities.com/winter-events-in-prague-christmas-markets-holiday-celebrations-exhibitions-and-more/'];
+const CATS={market:'Markets',music:'Concerts',club:'Club gigs',stage:'Opera, ballet & theatre',expo:'Exhibitions',skate:'Skating',fest:'Festivals & family'};
+const D=(a,b)=>[a,b];
+const E=[
+// MARKETS
+{id:'mk-miru',n:'Christmas Market, Náměstí Míru',c:'market',r:D('2026-11-20','2026-12-24'),og:1,w:'20 Nov – 24 Dec · 10:00–20:00',t:[600,1200],v:'Náměstí Míru, Prague 2',ll:[50.0752,14.4378],free:1,pr:'Free entry',src:[EX,PE],note:'Outside the Church of St. Ludmila. Both sources give the same dates; the hours come from the Prague Experience list.'},
+{id:'mk-rep',n:'Christmas Market, Republic Square',c:'market',r:D('2026-11-25','2026-12-24'),og:1,w:'25 Nov – 24 Dec or 6 Jan (sources differ) · 10:00–20:00',t:[600,1200],v:'Náměstí Republiky, Prague 1',ll:[50.0885,14.4300],free:1,pr:'Free entry',src:[EX,PE],note:'Sources disagree on the end date: Prague Experience says 6 Jan 2027, while Expats.cz gives 24 Dec for the area toward V Celnici. I show 24 Dec, the shorter run. Check before you plan a late-December or January visit.'},
+{id:'mk-tylak',n:'Christmas Market, Tylovo náměstí',c:'market',r:D('2026-11-26','2026-12-24'),og:1,w:'26 Nov – 24 Dec',v:'Tylovo náměstí, Prague 2',ll:[50.0742,14.4327],free:0,pr:'Entry price not stated',src:[EX],note:'Opening hours and entry price are not stated in the source.'},
+{id:'mk-main',n:'Prague Christmas Markets: Old Town Square and Wenceslas Square',c:'market',r:D('2026-11-28','2027-01-06'),og:1,w:'28 Nov – 6 Jan · daily 10:00–22:00',t:[600,1320],v:'Old Town Square and Wenceslas Square',ll:[50.0875,14.4213],free:1,pr:'Free entry',src:[PE,EX],note:'The largest markets. The sources give no tree-lighting date or time.'},
+{id:'mk-hol',n:'Holešovice Market Christmas',c:'market',r:D('2026-11-26','2026-12-22'),og:1,wd:[1,2,3,4,5,6],w:'26 Nov – 22 Dec · Tue–Fri 14:00–21:00, Sat–Sun 10:00–17:00, closed Mon',v:'Next to Hall 22, Holešovická tržnice',ll:[50.1033,14.4400],free:0,pr:'Entry price not stated',src:[EX],note:'Weekday and weekend hours as published. Closed Mondays.'},
+{id:'mk-and',n:'Christmas Market, Anděl',c:'market',r:D('2026-11-28','2026-12-31'),og:1,w:'28 Nov – 31 Dec',v:'Anděl pedestrian zone, Smíchov',ll:[50.0707,14.4035],free:0,pr:'Entry price not stated',src:[EX],note:'The source does not confirm a Christmas timetable, so no hours are shown.'},
+{id:'mk-kul',n:'Kulaťák Advent Saturday Market',c:'market',ds:['2026-11-28','2026-12-05','2026-12-12','2026-12-19'],w:'Saturdays 28 Nov, 5, 12, 19 Dec · 08:00–14:00',t:[480,840],v:'Location not stated in source',ll:null,free:0,pr:'Entry price not stated',src:[EX],note:'Advent edition of the Saturday market.'},
+{id:'mk-mint',n:'MINT Market',c:'market',ds:['2026-11-28','2026-11-29'],w:'28–29 Nov · Sat 10:00–18:00, Sun 10:00–16:00',t:[600,1080],v:'Hall 13, Holešovice Market, Prague 7',ll:[50.1033,14.4400],free:1,pr:'Free entry',src:[PE,EX],note:'Sunday hours are 10:00–16:00; the calendar file uses the Saturday hours on Saturday.'},
+{id:'mk-karl',n:'Christmas Market, Karlínské náměstí',c:'market',ds:['2026-12-06'],w:'6 Dec · 12:00–20:00',t:[720,1200],v:'Karlínské náměstí, Prague 8',ll:[50.0925,14.4500],free:0,pr:'Entry price not stated',src:[EX],note:'One day only. The source says the tree is lit in the evening but gives no time.'},
+{id:'mk-lesser',n:'Lesser Town Market',c:'market',r:D('2026-11-17','2026-11-26'),wd:[1,3],w:'Tue and Thu until 26 Nov · 08:00–19:00',t:[480,1140],v:'Malostranské náměstí, Prague 1',ll:[50.0883,14.4037],free:1,pr:'Free entry',src:[PE],note:'Runs on Tuesdays and Thursdays between 17 and 26 Nov.'},
+{id:'mk-nap',n:'Farmers\' Market at Náplavka',c:'market',ds:['2026-11-21','2026-11-28'],w:'Saturdays 21 and 28 Nov · 08:00–14:00',t:[480,840],v:'Náplavka, Rašínovo nábřeží, Prague 2',ll:[50.0680,14.4120],free:1,pr:'Free entry',src:[PE],note:'Only the dates up to 28 Nov are listed in the source.'},
+// CONCERTS
+{id:'mu-korn',n:'KoRn',c:'music',ds:['2026-11-16'],w:'Mon 16 Nov · 19:30',t:[1170,1290],v:'O2 Arena, Českomoravská 17a, Prague 9',ll:[50.1047,14.4916],lo:1889,hi:2361,pr:'1,889–2,361 Kč',src:[PE]},
+{id:'mu-pit',n:'Pitbull: Dance Night',c:'music',ds:['2026-11-22'],w:'Sun 22 Nov · 20:00',t:[1200,1320],v:'O2 Arena, Českomoravská 17a, Prague 9',ll:[50.1047,14.4916],lo:2184,hi:8190,pr:'2,184–8,190 Kč',src:[PE]},
+{id:'mu-prod',n:'The Prodigy',c:'music',ds:['2026-11-23'],w:'Mon 23 Nov · 20:00',t:[1200,1320],v:'O2 Arena, Českomoravská 17a, Prague 9',ll:[50.1047,14.4916],lo:1948,hi:4690,pr:'1,948–4,690 Kč',src:[PE]},
+{id:'mu-sb',n:'Sarah Brightman: A Winter Symphony',c:'music',ds:['2026-11-26'],w:'Thu 26 Nov · 19:30',t:[1170,1290],v:'O2 Arena, Českomoravská 17a, Prague 9',ll:[50.1047,14.4916],lo:1500,hi:15900,pr:'1,500–15,900 Kč',src:[PE]},
+{id:'mu-4s',n:'The Four Seasons',c:'music',ds:['2026-11-17','2026-11-21'],w:'17 and 21 Nov · time not listed',v:'Smetana Hall, Municipal House',ll:[50.0875,14.4283],lo:1050,hi:1650,pr:'1,050–1,650 Kč',src:[PE]},
+{id:'mu-boc',n:'Best of Classics',c:'music',ds:['2026-11-20'],w:'Fri 20 Nov · 20:00',t:[1200,1320],v:'Smetana Hall, Municipal House',ll:[50.0875,14.4283],lo:1050,hi:1650,pr:'1,050–1,650 Kč',src:[PE]},
+{id:'mu-ave',n:'Ave Maria concert',c:'music',ds:['2026-11-19','2026-11-20','2026-11-21','2026-11-26','2026-11-27','2026-11-28'],w:'19, 20, 21, 26, 27, 28 Nov · 19:00',t:[1140,1230],v:'St. Francis of Assisi Church, Křižovnické náměstí',ll:[50.0866,14.4150],lo:550,hi:550,pr:'550 Kč',src:[PE]},
+{id:'mu-moz',n:'Dinner & Piano at Café Mozart',c:'music',ds:['2026-11-19','2026-11-21','2026-11-26'],w:'19, 21, 26 Nov · 19:00–22:00',t:[1140,1320],v:'Café Mozart, Old Town Square 22',ll:[50.0875,14.4215],pr:'Price not listed',src:[PE]},
+{id:'mu-xc',n:'Christmas Concerts',c:'music',ds:['2026-11-28','2026-11-29','2026-11-30'],w:'28–30 Nov · times not listed',v:'Lobkowicz Palace and St. Nicholas Church',ll:[50.0914,14.4040],pr:'Price not listed',src:[PE],note:'The source also lists an Advent concert at Lobkowicz Palace on 28 Nov at 16:00, but gives the National Theatre address for it, so I did not list it separately.'},
+{id:'mu-stm',n:'Early Evening Christmas Concerts at St. Martin',c:'music',r:D('2026-11-28','2026-12-26'),og:1,w:'28 Nov – 26 Dec · 17:00 (days not specified)',t:[1020,1110],v:'Klementinum, Karlova 1',ll:[50.0865,14.4165],pr:'Price not listed',src:[PE],note:'The source gives a date range and a start time but not which days.'},
+{id:'mu-sound',n:'Prague Sounds Festival',c:'music',r:D('2026-11-02','2026-11-22'),w:'2–22 Nov',v:'Rudolfinum, Lucerna, La Fabrika, Camp, ARCHA+',ll:[50.0897,14.4146],pr:'Price not listed',src:[PE,EL],note:'A festival with different shows on different nights. Check the festival programme for the night you want.'},
+// OPERA AND BALLET
+{id:'st-nab',n:'Nabucco',c:'stage',ds:['2026-11-18','2026-11-21'],w:'18 and 21 Nov · time not listed',v:'Prague State Opera, Wilsonova 4',ll:[50.0834,14.4339],lo:990,hi:1790,pr:'990–1,790 Kč',src:[PE]},
+{id:'st-trav',n:'La traviata',c:'stage',ds:['2026-11-20','2026-11-29'],w:'20 and 29 Nov · time not listed',v:'Prague State Opera, Wilsonova 4',ll:[50.0834,14.4339],lo:990,hi:1790,pr:'990–1,790 Kč',src:[PE]},
+{id:'st-flute',n:'The Magic Flute',c:'stage',ds:['2026-11-20','2026-11-26'],w:'20 and 26 Nov · time not listed',v:'Estates Theatre, Ovocný trh 1',ll:[50.0867,14.4228],lo:1190,hi:1690,pr:'1,190–1,690 Kč',src:[PE]},
+{id:'st-don',n:'Don Giovanni',c:'stage',ds:['2026-11-22','2026-11-27'],w:'22 and 27 Nov · time not listed',v:'Estates Theatre, Ovocný trh 1',ll:[50.0867,14.4228],lo:1190,hi:1690,pr:'1,190–1,690 Kč',src:[PE]},
+{id:'st-onegin',n:'Onegin (ballet)',c:'stage',ds:['2026-11-24','2026-11-25','2026-11-28','2026-11-29'],w:'24, 25, 28, 29 Nov · time not listed',v:'National Theatre, Národní 2',ll:[50.0812,14.4130],lo:750,hi:1290,pr:'750–1,290 Kč',src:[PE]},
+{id:'st-swan',n:'Swan Lake',c:'stage',ds:['2026-11-27'],w:'Fri 27 Nov · 17:00',t:[1020,1140],v:'Broadway Theatre, Na Příkopě 31',ll:[50.0861,14.4285],lo:850,hi:1450,pr:'850–1,450 Kč',src:[PE]},
+{id:'st-nut',n:'The Nutcracker',c:'stage',ds:['2026-11-19','2026-11-26','2026-12-04','2026-12-11','2026-12-20','2026-12-22','2026-12-24','2026-12-25','2026-12-28','2026-12-30','2027-01-01','2027-01-03','2027-01-17','2027-01-24','2027-01-31'],w:'From 19 Nov, 15 dates to 31 Jan 2027',v:'Broadway Theatre, Na Příkopě 31',ll:[50.0861,14.4285],pr:'Price not listed',src:[PE],note:'Dates: 19, 26 Nov; 4, 11, 20, 22, 24, 25, 28, 30 Dec; 1, 3, 17, 24, 31 Jan.'},
+// EXHIBITIONS
+{id:'ex-press',n:'Czech Press Photo',c:'expo',r:D('2026-11-01','2026-11-30'),og:1,w:'Until 30 Nov · 10:00–18:00',t:[600,1080],v:'National Museum, Václavské náměstí 68',ll:[50.0791,14.4300],lo:200,hi:200,ch:0,x:'Plus the general museum entry fee, not included here.',pr:'Adult 200, senior/student 120, children 0–15 free',src:[PE]},
+{id:'ex-hp',n:'Harry Potter: The Exhibition',c:'expo',r:D('2026-11-01','2027-03-21'),og:1,w:'Until 21 Mar 2027',v:'PVA Exhibition Centre, Hall 6, Beranových 667, Prague 9',ll:[50.1385,14.5160],lo:450,hi:1990,pr:'450–1,990 Kč',src:[PE],note:'Opening hours are not listed in the source.'},
+{id:'ex-blanka',n:'Timeless: Blanka Matragi',c:'expo',r:D('2026-11-01','2026-12-31'),og:1,w:'Until 31 Dec · 10:00–19:00',t:[600,1140],v:'Municipal House, náměstí Republiky 5',ll:[50.0875,14.4283],lo:155,hi:260,ch:155,pr:'Adult 260, senior/student 155, family 550',src:[PE],note:'The lowest price is the senior and student rate.'},
+{id:'ex-banksy',n:'World of Banksy',c:'expo',r:D('2026-11-01','2027-12-31'),og:1,w:'Open run · tickets on the day',v:'St. Michael\'s Church, Michalská 29',ll:[50.0845,14.4184],lo:360,hi:360,ch:150,pr:'Adult 360, child 150, family 910',src:[PE],note:'The source lists an end date of 31 Dec 2027, which may be a typo.'},
+{id:'ex-ng',n:'National Gallery Free Entry Day',c:'expo',ds:['2026-11-17'],w:'Tue 17 Nov · 10:00–18:00',t:[600,1080],v:'Schwarzenberg Palace, Sternberg Palace, St. Agnes Convent',ll:[50.0905,14.4000],free:1,pr:'Free entry to permanent exhibitions',src:[PE]},
+{id:'ex-lich',n:'Liechtenstein Palace Kampa Open Day',c:'expo',ds:['2026-11-17'],w:'Tue 17 Nov',v:'U Sovových mlýnů 4, Malá Strana',ll:[50.0835,14.4090],free:1,pr:'Free entry',src:[PE]},
+{id:'ex-beth',n:'Christmas Exhibition, Bethlehem Chapel',c:'expo',r:D('2026-11-28','2027-01-03'),og:1,w:'28 Nov – 3 Jan · 09:00–18:00 (holiday hours vary)',t:[540,1080],v:'Bethlehem Chapel Crypt, Betlémské náměstí 5',ll:[50.0867,14.4180],lo:140,hi:140,ch:70,pr:'Adult 140, child 70',src:[PE]},
+{id:'ex-antique',n:'Antique Fair',c:'expo',r:D('2026-11-26','2026-11-29'),w:'26–29 Nov',v:'New Town Hall, Karlovo náměstí',ll:[50.0766,14.4194],pr:'Price not shown',src:[EL]},
+// SKATING
+{id:'sk-letna',n:'Ice skating, Letná Park',c:'skate',r:D('2026-11-14','2027-03-07'),og:1,w:'Until 7 Mar 2027 · daily 09:00–21:00',t:[540,1260],v:'Letná Park, Prague 7',ll:[50.0985,14.4245],lo:150,hi:150,ch:100,hire:[100,130],pr:'Adult 150, child 100; skate hire 100–130 Kč',src:[PE]},
+{id:'sk-vyst',n:'Indoor ice skating, Výstaviště',c:'skate',r:D('2026-11-14','2027-03-28'),wd:[5,6],w:'Sat–Sun until 28 Mar 2027 · 15:15–17:15',t:[915,1035],v:'Small Sports Hall, Výstaviště 67, Prague 7',ll:[50.1086,14.4333],lo:150,hi:150,ch:80,hire:[60,100],pr:'Adult 150, child 80; skate hire 60–100 Kč',src:[PE]},
+{id:'sk-fran',n:'Ice skating, Na Františku',c:'skate',r:D('2026-11-25','2027-02-28'),og:1,w:'25 Nov – 28 Feb · Mon–Fri 08:00–18:30, Sat–Sun 08:00–19:30',v:'Na Františku Sports Centre, Kozí 847',ll:[50.0922,14.4226],lo:70,hi:70,ch:40,hire:[50,50],pr:'Adult 70, child 40; skate hire 50 Kč',src:[PE]},
+{id:'sk-wenc',n:'Ice skating, Wenceslas Square',c:'skate',r:D('2026-11-28','2027-02-15'),og:1,w:'28 Nov – 15 Feb · daily 09:00–22:00',t:[540,1320],v:'Wenceslas Square',ll:[50.0810,14.4283],lo:200,hi:200,ch:100,hire:[150,150],pr:'Adult 200, child 100; skate hire 150 Kč per hour',src:[PE]},
+{id:'sk-ovoc',n:'Ice skating, Ovocný trh',c:'skate',r:D('2026-11-28','2027-01-31'),og:1,w:'28 Nov – 31 Jan · daily 10:00–21:00',t:[600,1260],v:'Ovocný trh, behind the Estates Theatre',ll:[50.0875,14.4235],pr:'Price not listed',src:[PE]},
+// FESTIVALS AND FAMILY
+{id:'fe-wine',n:'St Martin\'s Wine Festival',c:'fest',r:D('2026-11-14','2026-11-15'),w:'14–15 Nov · 12:00–18:00',t:[720,1080],v:'St. Wenceslas Vineyard, Staré zámecké schody 6',ll:[50.0922,14.4108],free:1,pr:'Free entry',src:[PE]},
+{id:'fe-krampus',n:'Krampus Show',c:'fest',ds:['2026-11-21'],w:'Sat 21 Nov · family show 16:00, night show 20:00',t:[960,1080],v:'Výstaviště, in front of the Industrial Palace',ll:[50.1086,14.4333],pr:'Price not shown',src:[EL]},
+{id:'fe-film',n:'French Film Festival',c:'fest',r:D('2026-11-19','2026-11-25'),w:'19–25 Nov',v:'Prague cinemas (venues not stated)',ll:null,pr:'Price not shown',src:[EL]},
+{id:'fe-castle',n:'Prague Castle Christmas Open Day',c:'fest',ds:['2026-11-28'],w:'Sat 28 Nov · 09:00–17:00',t:[540,1020],v:'Prague Castle',ll:[50.0909,14.4005],free:1,pr:'Free entry',src:[PE]},
+{id:'fe-castle2',n:'Christmas at Prague Castle',c:'fest',r:D('2026-11-28','2027-01-03'),og:1,w:'28 Nov – 3 Jan',v:'Prague Castle',ll:[50.0909,14.4005],free:1,pr:'Free entry',src:[PE]},
+{id:'fe-vine',n:'Christmas at St. Wenceslas Vineyard',c:'fest',ds:['2026-11-28','2026-11-29','2026-12-05','2026-12-06','2026-12-12','2026-12-13','2026-12-19','2026-12-20','2026-12-26','2026-12-27','2026-12-28','2026-12-29','2026-12-30','2026-12-31'],w:'28–29 Nov, 5–6, 12–13, 19–20, 26–31 Dec · 12:00–18:00',t:[720,1080],v:'St. Wenceslas Vineyard, Prague 1',ll:[50.0922,14.4108],free:1,pr:'Free entry; drinks and snacks for sale',src:[PE]},
+{id:'fe-cruise',n:'Advent Cruise',c:'fest',ds:['2026-11-28','2026-11-29'],w:'28–29 Nov · 15:30',t:[930,1050],v:'Prague sightseeing cruise (boarding point not stated)',ll:null,lo:405,hi:585,ch:405,pr:'Adult 585, child 405',src:[PE]},
+{id:'fe-lamp',n:'Lamplighter on Charles Bridge',c:'fest',r:D('2026-11-30','2026-12-23'),og:1,w:'30 Nov – 23 Dec · daily 16:10–16:30',t:[970,990],v:'Charles Bridge',ll:[50.0865,14.4115],pr:'Price not listed',src:[PE,IC],note:'Insight Cities gives 1–23 Dec at 16:00–16:15 instead. I show the Prague Experience times; confirm on the day.'},
+{id:'fe-nye',n:'New Year\'s Eve in Prague',c:'fest',ds:['2026-12-31'],w:'Thu 31 Dec · peak at midnight',v:'Old Town Square, Wenceslas Square, the river and viewpoints',ll:[50.0875,14.4213],pr:'Free street celebration; cruises and dinners are ticketed',src:[NY,EX],note:'The source says there is no official public fireworks display in Prague. People set off their own in Old Town Square, Wenceslas Square and along the Vltava. Viewpoints: Charles Bridge, Petřín, Prague Castle area, Letná. A free children\'s show runs 16:45–17:30 at the Old Town Square market. The page does not give transport arrangements or tickets, and does not state the year, so check it.'},
+];
+const KEY=[
+['Tue 17 Nov','Public holiday (Struggle for Freedom and Democracy Day). National Gallery free entry day, 10:00–18:00.',PE],
+['Fri 20 Nov','Christmas market opens at Náměstí Míru.',EX],
+['Wed 25 Nov','Republic Square market and Na Františku skating open.',EX],
+['Sat 28 Nov','Main Old Town Square and Wenceslas Square markets open, 10:00–22:00.',PE],
+['Sun 6 Dec','One-day market at Karlínské náměstí, 12:00–20:00.',EX],
+['Thu 31 Dec','New Year\'s Eve. No official fireworks display.',NY]
+];
+// ---- extra listings (second research pass) ----
+const SK=['Songkick Prague concert calendar','https://www.songkick.com/metro-areas/28425-czech-republic-prague'];
+const PEU=['Prague.eu concerts and classical music','https://prague.eu/en/akce-kategorie/classical-music'];
+const EXC=['Expats.cz Prague concerts 2026','https://www.expats.cz/czech-news/article/overview-the-best-concerts-and-a-listers-coming-to-prague-in-2026'];
+const PEC=['Prague.eu concert listings','https://prague.eu/en/akce-kategorie/concerts'];
+const PCC=['Prague Congress Centre programme','https://www.praguecc.cz/en/prehled-akci'];
+const PTO=['Prague Ticket Office','https://www.pragueticketoffice.com/event/christmas-concert-of-the-prague-philharmonic-chamber-orchestra/2026-12-23-18-00'];
+const V={fk:['Forum Karlín, Pernerova 51',[50.0929,14.4476]],o2a:['O2 Arena, Českomoravská 17a',[50.1047,14.4916]],o2u:['O2 universum, Českomoravská',[50.1065,14.4935]],luc:['Lucerna Music Bar, Vodičkova 36',[50.0820,14.4254]],lucg:['Lucerna Great Hall, Vodičkova 36',[50.0820,14.4254]],rox:['Roxy, Dlouhá 33',[50.0905,14.4240]],arc:['ARCHA+, Na Poříčí 26',[50.0888,14.4330]],mf:['MeetFactory, Ke Sklárně 15',[50.0540,14.4090]],sas:['SaSaZu, Bubenské nábřeží 306',[50.1057,14.4458]],rud:['Rudolfinum, Alšovo nábřeží 12',[50.0897,14.4146]],mh:['Municipal House, Smetana Hall',[50.0875,14.4283]],so:['Prague State Opera, Wilsonova 4',[50.0834,14.4339]],jd:['Jazz Dock, Janáčkovo nábřeží 2',[50.0695,14.4088]],red:['Reduta Jazz Club, Národní 20',[50.0816,14.4152]],akr:['Palác Akropolis, Kubelíkova 27',[50.0840,14.4510]],pcc:['Prague Congress Centre, 5. května 65',[50.0626,14.4355]],sjud:['Church of Sts Simon and Jude',[50.0907,14.4207]],jak:['Basilica of St James',[50.0877,14.4234]],hs:['Church of the Holy Saviour, Klementinum',[50.0866,14.4162]],nik:['St Nicholas Church, Malá Strana',[50.0881,14.4033]],shf:['Sportovní hala Fortuna, Výstaviště',[50.1067,14.4310]],cl:['Municipal Library, Central Library',[50.0872,14.4190]],nd:['National Theatre, Národní 2',[50.0812,14.4130]]};
+const tt=(h,m)=>{const s=h*60+(m||0);return[s,s]};
+let _n=0;
+const _OFF=['EsDeeKid and Rico Ace','Mammoth with Florence Black','Prague Sounds: Kojey Radical','The Kid LAROI','Edis','Arlo Parks with Baird','Gerald Clayton','Clarinet Factory','Nieve Ella','Polyphia','Baby Lasagna','Kodaline','Bryan Adams','Nothing But Thieves','Iceage','The Rasmus','KALEO','Jazz Dock: Laco Deczi','Reduta Jazz Club: tribute concerts'];
+function M(n,c,d,w,t,vk,src,o){o=o||{};const v=V[vk]||[vk,null];const ds=(Array.isArray(d)?d:[d]);const _o=Object.assign({id:'x'+(++_n),n,c,ds,w,t:t||undefined,v:v[0],ll:v[1],pr:'Price not listed',src:src,x0:1},o);if(_o.r)delete _o.ds;if(_o.src.includes(PEU)&&_OFF.includes(_o.n))_o.src=_o.src.map(s=>s===PEU?PEC:s);if(vk==='pcc'&&!_o.note)_o.note='Venue taken from the Prague Congress Centre programme listing.';return _o}
+E.push(
+// ---- Sun 15 Nov
+M('Placebo','music','2026-11-15','Sun 15 Nov · time not listed',null,'shf',[SK,EXC]),
+M('EsDeeKid and Rico Ace','club','2026-11-15','Sun 15 Nov · 20:00',tt(20),'fk',[PEU,SK]),
+M('Mammoth with Florence Black','club','2026-11-15','Sun 15 Nov · 20:00',tt(20),'luc',[PEU,SK]),
+M('HEALTH and VOWWS','club','2026-11-15','Sun 15 Nov',null,'arc',[SK]),
+M('Despised Icon, Carnifex, Suffocation and more','club','2026-11-15','Sun 15 Nov',null,'mf',[SK]),
+// ---- 16-18 Nov
+M('Dresden Philharmonic','music','2026-11-16','Mon 16 Nov · 19:30',tt(19,30),'mh',[PEU]),
+M('The Pretty Reckless with Yonaka','club','2026-11-16','Mon 16 Nov',null,'fk',[SK]),
+M('MEDUZA','club','2026-11-16','Mon 16 Nov',null,'sas',[SK]),
+M('Prague Sounds: Kojey Radical','club','2026-11-16','Mon 16 Nov · 20:00',tt(20),'luc',[PEU]),
+M('The Kid LAROI','music','2026-11-17','Tue 17 Nov · 20:00',tt(20),'o2a',[PEU,EXC],{note:'Songkick lists the venue as O2 universum; Expats.cz and Prague.eu say O2 Arena. I show O2 Arena, so check your ticket.'}),
+M('Xzibit','club','2026-11-17','Tue 17 Nov',null,'rox',[SK]),
+M('Omah Lay','club','2026-11-18','Wed 18 Nov',null,'fk',[SK]),
+M('Edis','club','2026-11-18','Wed 18 Nov · 20:00',tt(20),'Cargo Gallery',[PEU,SK]),
+M('Prague Sounds: Paul Hillier and Theatre of Voices','music','2026-11-18','Wed 18 Nov · 20:00',tt(20),'Divadlo X10',[PEU]),
+// ---- 19-23 Nov
+M('José González','club','2026-11-19','Thu 19 Nov',null,'arc',[SK]),
+M('Prague Sounds: Steve Reich 90','music','2026-11-19','Thu 19 Nov · 20:00',tt(20),'rud',[PEU]),
+M('Little BIG','club','2026-11-20','Fri 20 Nov',null,'lucg',[SK]),
+M('Prague Sounds: Samara Joy','music','2026-11-20','Fri 20 Nov · 19:00',tt(19),'rud',[PEU,SK]),
+M('Martina Pártlová','music','2026-11-20','Fri 20 Nov',null,'o2a',[SK]),
+M('Portugal. The Man','club','2026-11-21','Sat 21 Nov',null,'sas',[SK]),
+M('Arlo Parks with Baird','club','2026-11-21','Sat 21 Nov · 20:00',tt(20),'arc',[PEU,SK]),
+M('Tinlicker','club','2026-11-21','Sat 21 Nov',null,'rox',[SK]),
+M('Prague Sounds: Max Cooper','music','2026-11-21','Sat 21 Nov · 20:00',tt(20),'rud',[PEU,SK]),
+M('Stahlzeit','club','2026-11-21','Sat 21 Nov',null,'fk',[SK]),
+M('Artemas','club','2026-11-22','Sun 22 Nov',null,'sas',[SK]),
+M('Arab Strap','club','2026-11-22','Sun 22 Nov',null,'mf',[SK]),
+M('Prague Sounds: Anoushka Shankar','music','2026-11-22','Sun 22 Nov · 20:00',tt(20),'rud',[PEU]),
+M('Wednesday 13, The Birthday Massacre and Killus','club','2026-11-23','Mon 23 Nov',null,'Futurum Music Bar',[SK]),
+// ---- 24-30 Nov
+M('Papa Roach','music','2026-11-24','Tue 24 Nov',null,'o2u',[EXC]),
+M('Bach: Violin Sonatas','music','2026-11-24','Tue 24 Nov · 19:30',tt(19,30),'sjud',[PEU]),
+M('Gerald Clayton','music','2026-11-24','Tue 24 Nov · 20:00',tt(20),'jd',[PEU]),
+M('The Witcher III in Concert','music','2026-11-25','Wed 25 Nov',null,'o2u',[EXC]),
+M('Alena Hron and Alban Gerhardt','music',['2026-11-25','2026-11-26'],'25–26 Nov · 19:30',tt(19,30),'mh',[PEU]),
+M('Mahler, Schönberg, Zemlinsky','stage','2026-11-26','Thu 26 Nov · 19:00',tt(19),'so',[PEU]),
+M('Clarinet Factory','music','2026-11-26','Thu 26 Nov · 19:30–21:30',[1170,1290],'cl',[PEU]),
+M('Nieve Ella','club','2026-11-26','Thu 26 Nov · 20:00',tt(20),'mf',[PEU]),
+M('Polyphia','club','2026-11-28','Sat 28 Nov · 19:30',tt(19,30),'sas',[PEU]),
+M('Advent concerts at the National Theatre','stage',['2026-11-29','2026-12-06','2026-12-13','2026-12-20'],'29 Nov, 6, 13, 20 Dec',null,'nd',[IC]),
+// ---- December
+M('Sinfonietta Cracovia and Jan Mráček','music','2026-12-01','Tue 1 Dec · 19:30',tt(19,30),'sjud',[PEU]),
+M('Baby Lasagna','club','2026-12-03','Thu 3 Dec · 20:00',tt(20),'Venue not listed',[PEU]),
+M('Hansel and Gretel','stage',['2026-12-04','2026-12-13','2026-12-23','2027-01-01'],'4, 13, 23 Dec and 1 Jan',null,'so',[IC],{lo:350,hi:890,pr:'350–890 Kč'}),
+M('Rusalka','stage',['2026-12-05','2026-12-16','2026-12-27','2027-01-05','2027-01-22','2027-02-17','2027-02-26'],'5, 16, 27 Dec; 5, 22 Jan; 17, 26 Feb',null,'nd',[IC],{lo:250,hi:1390,pr:'250–1,390 Kč'}),
+M('Monte Cristo','stage',['2026-12-04'],'From 4 Dec, several dates to 29 Mar 2027',null,'pcc',[PCC],{note:'The programme page lists a run of performances from 4 Dec 2026 to 29 Mar 2027 without a per-date list.'}),
+M('Mikuláš (St Nicholas Eve)','fest','2026-12-05','Sat 5 Dec',null,'Old Town Square',[IC],{ll:[50.0875,14.4213],free:0,pr:'Price not listed'}),
+M('KLOFAMA, Nico Moreno and NOVAH','club','2026-12-05','Sat 5 Dec · doors 21:00',tt(21),'shf',[['Songkick event page','https://www.songkick.com/concerts/43248289-klofama-at-sportovni-hala-fortuna']],{note:'The page gives the door time, not a start time. It also shows an "in 2 weeks" countdown that does not fit 5 Dec, so confirm the date on the ticket seller\'s site.'}),
+M('Kodaline','club',['2026-12-05'],'Sat 5 Dec (Expats.cz says 15 Dec)',null,'sas',[PEU,EXC],{note:'Prague.eu lists 5 Dec; Expats.cz lists 15 Dec. Confirm with SaSaZu.'}),
+M('Sandra: 50 Years on Stage','music','2026-12-06','Sun 6 Dec',null,'fk',[EXC]),
+M('Love Actually: A Movie Night with a Live Orchestra','music','2026-12-09','Wed 9 Dec',null,'pcc',[PCC]),
+M('Olympic','club','2026-12-09','Wed 9 Dec · 20:00',tt(20),'fk',[['Jambase listing','https://www.jambase.com/show/olympic-forum-karlin-20261209']]),
+M('Lucie','music','2026-12-10','Thu 10 Dec',null,'o2a',[EXC],{note:'Expats.cz mentions this date only in its intro text, not in its December list.'}),
+M('Bryan Adams','music','2026-12-13','Sun 13 Dec',null,'o2a',[EXC,PEU]),
+M('Ondřej Brzobohatý and Ondřej Brousek: Souboj klavírů','music','2026-12-13','Sun 13 Dec',null,'pcc',[PCC]),
+M('Vánoční taneční scéna 2026','stage',['2026-12-13','2026-12-14','2026-12-15'],'13–15 Dec',null,'pcc',[PCC]),
+M('Christmas concert of Marie Rottrová','music','2026-12-15','Tue 15 Dec',null,'pcc',[PCC]),
+M('Christmas Carp Market','market',['2026-12-15','2026-12-16','2026-12-17','2026-12-18','2026-12-19','2026-12-20','2026-12-21','2026-12-22','2026-12-23','2026-12-24'],'15–24 Dec',null,'Various locations, often near Christmas markets',[IC],{og:1}),
+M('St. James\' Christmas','music',['2026-12-16','2026-12-26'],'16:00 on 16 Dec or 26 Dec',tt(16),'jak',[PEU],{note:'The two Prague.eu lists give different dates (16 Dec in one, 26 Dec in the other). Check before you go.'}),
+M('Czech Christmas Mass, Church of St Henry and St Kunhuta','music','2026-12-21','Mon 21 Dec · 18:00',tt(18),'Church of St Henry and St Kunhuta',[PEU]),
+M('Czech Christmas Mass, Municipal House','music',['2026-12-22','2026-12-23'],'22–23 Dec · 16:00',tt(16),'mh',[PEU]),
+M('Christmas Concert of the Prague Philharmonic Chamber Orchestra','music','2026-12-23','Wed 23 Dec · 18:00',tt(18),'Rudolfinum, Dvořák Hall, Alšovo nábřeží 12',[PTO],{ll:[50.0897,14.4146]}),
+M('Christmas Gala Concert','music','2026-12-25','Fri 25 Dec · 20:00',tt(20),'rud',[PEU]),
+M('Czech Christmas Mass "Hey, Master…"','music','2026-12-25','Fri 25 Dec · 16:00',tt(16),'Church of St Václav',[PEU]),
+M('Christmas concert at St Nicholas Church','music','2026-12-25','Fri 25 Dec · 17:00–18:00',[1020,1080],'nik',[PEU]),
+M('Christmas Concert in Prague\'s Old Town','music','2026-12-26','Sat 26 Dec · 17:30–18:30',[1050,1110],'hs',[PEU]),
+M('Boxing Day Swimmers','fest','2026-12-26','Sat 26 Dec · 11:00',tt(11),'Vltava, between Slavonic and Střelecký islands',[IC],{ll:[50.0768,14.4115]}),
+M('Jiří Korn: KORNCEPT','music',['2026-12-28','2026-12-29','2026-12-30'],'28–30 Dec',null,'pcc',[PCC]),
+M('Baroque Soirées: Magnificat','music','2026-12-30','Wed 30 Dec · 19:00',tt(19),'sjud',[PEU]),
+// ---- January and later
+M('Czech Philharmonic: New Year\'s Concerts','music',['2026-12-31','2027-01-01'],'31 Dec and 1 Jan · 11:00',tt(11),'rud',[PEU]),
+M('New Year\'s Concert at the Municipal House','music','2027-01-01','Fri 1 Jan · 15:00',tt(15),'mh',[PEU]),
+M('New Year\'s Concert, Basilica of St James','music','2027-01-01','Fri 1 Jan · 16:00',tt(16),'jak',[PEU]),
+M('Monika Melcová and a Buster Keaton film','music','2027-01-02','Sat 2 Jan · 11:00',tt(11),'mh',[PEU]),
+M('Three Kings Procession','fest','2027-01-03','Sun 3 Jan · blessing 15:00, parade 15:30',tt(15),'Church of St. Thomas to Old Town Square',[IC],{ll:[50.0881,14.4046]}),
+M('Cappella Mariana and L\'homme armé','music','2027-01-12','Tue 12 Jan · 19:30',tt(19,30),'sjud',[PEU]),
+M('Nothing But Thieves','club','2027-01-22','Fri 22 Jan · 20:00',tt(20),'o2u',[PEU]),
+M('Beethoven I','music','2027-01-25','Mon 25 Jan · 19:30',tt(19,30),'House of the Professed, baroque refectory',[PEU]),
+M('Tomáš Brauner and Mahler 7','music','2027-01-27','Wed 27 Jan · 19:30',tt(19,30),'mh',[PEU]),
+M('Lukáš Vondráček: Piano Recital','music','2027-01-30','Sat 30 Jan · 19:30',tt(19,30),'rud',[PEU]),
+M('Winter Affair 2027 (beer festival)','fest','2027-01-30','Sat 30 Jan',null,'Prague (venue not listed)',[IC]),
+M('Masopust parade, Žižkov','fest',['2027-02-06','2027-02-07','2027-02-08','2027-02-09'],'6–9 Feb',null,'Jiřího z Poděbrad Square, Žižkov',[IC],{ll:[50.0776,14.4492]}),
+M('Iceage','club','2027-02-07','Sun 7 Feb · 20:00',tt(20),'mf',[PEU]),
+M('Floyds CZ/SK: Pink Floyd Symphony Show','music','2027-02-13','Sat 13 Feb',null,'pcc',[PCC]),
+M('Bullet for My Valentine','music','2027-02-16','Tue 16 Feb',null,'o2u',[SK]),
+M('The Rasmus','club','2027-02-17','Wed 17 Feb · 20:00',tt(20),'sas',[PEU,SK]),
+M('One Vision of Queen','music','2027-02-23','Tue 23 Feb',null,'o2u',[SK]),
+M('Electric Callboy','music','2027-02-24','Wed 24 Feb',null,'o2a',[SK]),
+M('Jimmy Carr: Laughs Funny','stage','2027-02-24','Wed 24 Feb',null,'pcc',[PCC]),
+M('Tata Bojs','club','2027-02-27','Sat 27 Feb',null,'fk',[SK]),
+M('Boris Giltburg: Piano Recital','music','2027-02-27','Sat 27 Feb · 19:30',tt(19,30),'rud',[PEU]),
+M('Pragueshorts Film Festival','fest',['2027-02-28'],'28 Feb – 21 Mar 2027',null,'Venue not listed',[IC]),
+M('James Blunt','music','2027-03-05','Fri 5 Mar',null,'o2u',[SK]),
+M('Suzi Quatro','club','2027-03-05','Fri 5 Mar',null,'fk',[SK]),
+M('KALEO','club','2027-03-20','Sat 20 Mar · 20:00',tt(20),'fk',[PEU]),
+// ---- jazz clubs, exhibitions
+M('Reduta Jazz Club: tribute concerts','music',['2026-11-15'],'Tribute series, mostly 19:00 (days not specified)',tt(19),'red',[PEU],{og:1,r:['2026-11-15','2027-03-12'],note:'Series include Ray Charles, Nina Simone, Louis Armstrong, Sinatra and a Beatles jazz tribute. Each series has its own date range (for example Ray Charles ends 24 Nov, Bohemia Big Band runs to 12 Mar 2027), and the listings do not give exact nights.'}),
+M('Jazz Dock: Laco Deczi','music',['2026-11-15'],'22:00 until 27 Dec (days not specified)',tt(22),'jd',[PEU],{og:1,r:['2026-11-15','2026-12-27'],note:'The listing gives a run until 27 Dec; check the Jazz Dock programme for the nights.'}),
+M('Against the Current: The Surrealist Group, 1934–2024','expo',['2026-11-26'],'Opens 26 Nov',null,'National Gallery Prague',[IC],{og:1,r:['2026-11-26','2027-03-31'],ll:[50.0905,14.4000],note:'The source gives the opening date only, so the end date shown is not published.'}),
+M('230 Years of the National Gallery','expo',['2026-11-15'],'Until 3 Jan 2027',null,'Trade Fair Palace, National Gallery Prague',[IC],{og:1,r:['2026-11-15','2027-01-03'],ll:[50.1086,14.4333]}),
+M('Vietnam: Near and Far','expo',['2026-11-15'],'Closes 7 Jan 2027',null,'Náprstek Museum',[IC],{og:1,r:['2026-11-15','2027-01-07'],ll:[50.0868,14.4130]})
+);
+E.forEach(e=>{if(e.r&&!e.ds){}});
+// dates
+const pad=n=>String(n).padStart(2,'0');
+const toD=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(Date.UTC(y,m-1,d))};
+const iso=d=>d.getUTCFullYear()+'-'+pad(d.getUTCMonth()+1)+'-'+pad(d.getUTCDate());
+const addD=(s,n)=>{const d=toD(s);d.setUTCDate(d.getUTCDate()+n);return iso(d)};
+const dow=s=>(toD(s).getUTCDay()+6)%7;
+const DN=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],MF=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const fd=s=>DN[dow(s)]+' '+(+s.slice(8))+' '+MN[+s.slice(5,7)-1];
+function pn(){const p=new Intl.DateTimeFormat('en-CA',{timeZone:'Europe/Prague',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).formatToParts(new Date());const g=k=>p.find(x=>x.type===k).value;return{iso:g('year')+'-'+g('month')+'-'+g('day'),min:(+g('hour')%24)*60+(+g('minute'))}}
+E.forEach(e=>{let a=[];if(e.ds)a=e.ds.slice();else{let d=e.r[0];while(d<=e.r[1]){if(!e.wd||e.wd.includes(dow(d)))a.push(d);d=addD(d,1)}}e._d=a});
+const hm=m=>pad(Math.floor(m/60)%24)+':'+pad(m%60);
+const kc=n=>Math.round(n).toLocaleString('en-GB').replace(/,/g,' ')+' Kč';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+const dist=(a,b)=>{const R=6371000,r=x=>x*Math.PI/180,dl=r(b[0]-a[0]),dn=r(b[1]-a[1]),h=Math.sin(dl/2)**2+Math.cos(r(a[0]))*Math.cos(r(b[0]))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
+const dtx=m=>m<1000?Math.max(10,Math.round(m/10)*10)+' m':(m/1000).toFixed(1)+' km';
+const wk=m=>Math.max(1,Math.round(m*1.3/80))+' min walk';
+const gm=v=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(v.v+', Praha');
+const hasP=e=>e.lo!=null;
+const nextD=(e,from)=>e._d.find(d=>d>=from)||null;
+const inWin=(e,a,b)=>e._d.some(d=>d>=a&&d<=b);
+// state
+const S={tab:'find',w:'today',c:'all',free:false,q:'',lim:30,loc:null,calDay:null,calMon:null,plan:{a:2,k:0,sc:'lo',hire:true,pick:new Set(['sk-letna','ex-banksy'])}};
+const TABS=[['find',"What's on"],['cal','Calendar'],['tix','Tickets'],['plan','Budget'],['about','Sources']];
+$('tabs').innerHTML=TABS.map(t=>`<button class="tab" role="tab" data-t="${t[0]}" aria-selected="false">${t[1]}</button>`).join('');
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('.tab');if(b)go(b.dataset.t)});
+function go(t){S.tab=t;document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===t));TABS.forEach(x=>$('s-'+x[0]).hidden=x[0]!==t);try{history.replaceState(null,'','#'+t)}catch(e){}window.scrollTo(0,0)}
+function win(){const T=pn().iso;if(S.w==='today')return[T,T];if(S.w==='wkend'){const d=dow(T);if(d>=5)return[T,addD(T,6-d)];return[addD(T,5-d),addD(T,6-d)]}if(S.w==='7d')return[T,addD(T,6)];return[T,'2099-12-31']}
+function card(e,day){const T=pn().iso,nx=day||nextD(e,T);
+ const d=S.loc&&e.ll?dist(S.loc,e.ll):null;
+ const pr=hasP(e)?`<div class="price">${e.lo===e.hi?kc(e.lo):'from '+kc(e.lo)}<small>${e.lo===e.hi?'ticket':'to '+kc(e.hi)}</small></div>`:e.free?`<div class="price">Free</div>`:'';
+ return `<article class="pv"><div style="display:flex;justify-content:space-between;gap:10px"><div style="min-width:0"><h3>${e.n}</h3><div class="meta">${e.w}</div><div class="meta">${e.v}${d!=null?' · '+dtx(d)+' away, '+wk(d):''}</div></div>${pr}</div>
+ <div class="row"><span class="pill g">${CATS[e.c]}</span>${e.free?'<span class="pill g">Free entry</span>':''}${nx&&nx===pn().iso?'<span class="pill g">Today</span>':nx&&!e.og?`<span class="pill">Next: ${fd(nx)}</span>`:''}${!e.free&&!hasP(e)?'<span class="pill w">No price found</span>':''}</div>
+ <p class="meta" style="margin:8px 0 0">${hasP(e)||e.free?e.pr+'.':e.pr+'.'}${e.note?' '+e.note:''}</p>
+ <div class="row">${e.ll?`<a class="btn p" href="${gm(e)}" target="_blank" rel="noopener">Directions</a>`:''}<a class="btn" href="${e.src[0][1]}" target="_blank" rel="noopener">Source</a>${nx?`<button class="btn" data-ics="${e.id}" data-day="${nx}">Add ${fd(nx)} to calendar</button>`:''}</div></article>`}
+function rFind(){const [a,b]=win(),T=pn().iso;
+ const nq=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase(),qq=nq(S.q.trim());
+ let L=E.filter(e=>(S.c==='all'||e.c===S.c)&&(!S.free||e.free)&&(!qq||nq(e.n+' '+e.v).includes(qq))&&inWin(e,a,b));
+ const first=e=>e._d.find(d=>d>=a&&d<=b);
+ const ded=L.filter(e=>!e.og).sort((x,y)=>first(x).localeCompare(first(y))||((x.t?x.t[0]:0)-(y.t?y.t[0]:0)));
+ const og=L.filter(e=>e.og).sort((x,y)=>x.n.localeCompare(y.n));
+ const todayN=E.filter(e=>e._d.includes(T)).length,freeN=E.filter(e=>e.free&&e._d.some(d=>d>=T)).length,pricedN=E.filter(e=>hasP(e)).length;
+ const WL={today:'today',wkend:'this weekend','7d':'in the next 7 days',all:'from today onwards'};
+ let body='';let lastD='';
+ ded.slice(0,S.lim).forEach(e=>{const f=first(e);if(S.w!=='today'&&f!==lastD){body+=`<h2 style="font-size:19px;margin:14px 0 2px">${fd(f)}</h2>`;lastD=f}body+=card(e,f)});
+ $('s-find').innerHTML=`<div class="hero"><h1>What's on in Prague?</h1><p>${E.length} events and seasonal attractions from mid-November 2026 into early 2027, with dates, venues and ticket prices where the sources publish them.</p></div>
+ <div class="stats"><div class="stat"><b>${todayN}</b><span>listings today</span></div><div class="stat"><b>${freeN}</b><span>free to enter</span></div><div class="stat"><b>${pricedN}</b><span>with a published price</span></div><div class="stat"><b>28 Nov</b><span>main Christmas markets open</span></div></div>
+ <div class="chips" role="group" aria-label="When">${[['today','Today'],['wkend','This weekend'],['7d','Next 7 days'],['all','All upcoming']].map(x=>`<button class="chip" data-w="${x[0]}" aria-pressed="${S.w===x[0]}">${x[1]}</button>`).join('')}</div>
+ <div class="chips" role="group" aria-label="Category"><button class="chip" data-c="all" aria-pressed="${S.c==='all'}">All</button>${Object.keys(CATS).map(k=>`<button class="chip" data-c="${k}" aria-pressed="${S.c===k}">${CATS[k]}</button>`).join('')}<button class="chip" data-free="1" aria-pressed="${S.free}">Free only</button></div>
+ <div class="f"><label for="q">Search by name or venue</label><input id="q" type="search" placeholder="For example Rudolfinum, jazz, Roxy" value="${esc(S.q)}"></div>
+ <p class="sub">${L.length} ${L.length===1?'listing':'listings'} ${WL[S.w]}.${S.loc?'':' Tap "Near me" at the top to see distances.'}</p>
+ <div class="list">${body||''}${ded.length>S.lim?`<button class="btn" data-more="1" style="justify-content:center">Show more (${ded.length-S.lim} left)</button>`:''}${!ded.length&&!og.length?'<div class="card">Nothing in the sources matches these filters. Try "All upcoming".</div>':''}</div>
+ ${og.length?`<h2 style="font-size:20px">Open all season</h2><p class="sub">Long runs, markets and rinks that are open on most days in this period.</p><div class="list">${og.map(e=>card(e,null)).join('')}</div>`:''}
+ <h2>Key dates</h2><div class="card"><div class="key">${KEY.map(k=>`<b>${k[0]}</b><span>${k[1]}</span>`).join('')}</div><p class="note">The Christmas tree lighting date and time were not in any source I could read, so I do not list it.</p></div>`}
+$('s-find').addEventListener('click',e=>{const w=e.target.closest('[data-w]');if(w){S.w=w.dataset.w;S.lim=30;rFind();return}const c=e.target.closest('[data-c]');if(c){S.c=c.dataset.c;S.lim=30;rFind();return}if(e.target.closest('[data-free]')){S.free=!S.free;S.lim=30;rFind();return}if(e.target.closest('[data-more]')){S.lim+=40;rFind();return}icsClick(e)});
+$('s-find').addEventListener('input',e=>{if(e.target.id!=='q')return;S.q=e.target.value;S.lim=30;const p=e.target.selectionStart;rFind();const q=$('q');q.focus();try{q.setSelectionRange(p,p)}catch(x){}});
+// ICS
+const ie=s=>String(s).replace(/\\/g,'\\\\').replace(/;/g,'\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+function icsMake(ev,day){const d=day.replace(/-/g,'');const n=pn().iso.replace(/-/g,'');
+ const L=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Prague Events Tab//EN','CALSCALE:GREGORIAN','BEGIN:VTIMEZONE','TZID:Europe/Prague','BEGIN:STANDARD','DTSTART:19701025T030000','TZOFFSETFROM:+0200','TZOFFSETTO:+0100','RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU','END:STANDARD','BEGIN:DAYLIGHT','DTSTART:19700329T020000','TZOFFSETFROM:+0100','TZOFFSETTO:+0200','RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1SU','END:DAYLIGHT','END:VTIMEZONE','BEGIN:VEVENT','UID:'+ev.id+'-'+d+'@prague-events-tab','DTSTAMP:'+n+'T000000Z','SUMMARY:'+ie(ev.n),'LOCATION:'+ie(ev.v+', Praha'),'DESCRIPTION:'+ie(ev.w+'. '+ev.pr+'. Source: '+ev.src[0][1]+'. Confirm details with the organiser.')];
+ if(ev.t){const s=ev.t[0],e=Math.min(ev.t[1]>ev.t[0]?ev.t[1]:s+120,1439);L.push('DTSTART;TZID=Europe/Prague:'+d+'T'+pad(Math.floor(s/60))+pad(s%60)+'00','DTEND;TZID=Europe/Prague:'+d+'T'+pad(Math.floor(e/60))+pad(e%60)+'00')}
+ else L.push('DTSTART;VALUE=DATE:'+d,'DTEND;VALUE=DATE:'+addD(day,1).replace(/-/g,''));
+ L.push('BEGIN:VALARM','TRIGGER:-PT60M','ACTION:DISPLAY','DESCRIPTION:'+ie(ev.n),'END:VALARM','END:VEVENT','END:VCALENDAR');return L.join('\r\n')}
+function icsClick(e){const b=e.target.closest('[data-ics]');if(!b)return;const ev=E.find(x=>x.id===b.dataset.ics);if(!ev)return;try{const bl=new Blob([icsMake(ev,b.dataset.day)],{type:'text/calendar;charset=utf-8'}),u=URL.createObjectURL(bl),a=document.createElement('a');a.href=u;a.download=ev.id+'-'+b.dataset.day+'.ics';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),2000);b.textContent='Calendar file ready ✓'}catch(x){b.textContent='Could not create file'}}
+// CALENDAR
+function rCal(){const T=pn().iso;if(!S.calMon)S.calMon=T.slice(0,7);if(!S.calDay)S.calDay=T;
+ const [y,m]=S.calMon.split('-').map(Number),first=`${y}-${pad(m)}-01`,off=dow(first),dim=new Date(Date.UTC(y,m,0)).getUTCDate();
+ const prev=m===1?`${y-1}-12`:`${y}-${pad(m-1)}`,next=m===12?`${y+1}-01`:`${y}-${pad(m+1)}`;
+ const minM=T.slice(0,7),maxM='2027-03';
+ let cells='';for(let i=0;i<off;i++)cells+='<div></div>';
+ for(let d=1;d<=dim;d++){const s=`${y}-${pad(m)}-${pad(d)}`,n=E.filter(e=>!e.og&&e._d.includes(s)).length,past=s<T;cells+=`<button class="cd${past?' o':''}${s===T?' t':''}" data-d="${s}" ${past?'disabled':''} aria-pressed="${S.calDay===s}" aria-label="${fd(s)}, ${n} dated events">${d}<small>${n||''}</small></button>`}
+ const day=S.calDay,dated=E.filter(e=>!e.og&&e._d.includes(day)).sort((a,b)=>(a.t?a.t[0]:0)-(b.t?b.t[0]:0)),og=E.filter(e=>e.og&&e._d.includes(day));
+ $('s-cal').innerHTML=`<h2 style="margin-top:0">Calendar</h2><p class="sub">Numbers show dated events on each day. Open-all-season markets and rinks are listed under the day you pick.</p>
+ <div class="card"><div class="cn"><button class="btn" data-m="${prev}" ${S.calMon<=minM?'disabled':''}>‹ Prev</button><b style="font-family:'Space Grotesk',sans-serif;font-size:18px">${MF[m-1]} ${y}</b><button class="btn" data-m="${next}" ${S.calMon>=maxM?'disabled':''}>Next ›</button></div>
+ <div class="cal">${DN.map(x=>`<div class="h">${x}</div>`).join('')}${cells}</div></div>
+ <h2>${fd(day)}</h2><div class="list">${dated.map(e=>card(e,day)).join('')||'<div class="card">No dated events in the sources for this day.</div>'}</div>
+ ${og.length?`<h2 style="font-size:20px">Also open this day</h2><div class="list">${og.map(e=>card(e,day)).join('')}</div>`:''}`}
+$('s-cal').addEventListener('click',e=>{const d=e.target.closest('[data-d]');if(d&&!d.disabled){S.calDay=d.dataset.d;rCal();return}const m=e.target.closest('[data-m]');if(m&&!m.disabled){S.calMon=m.dataset.m;rCal();return}icsClick(e)});
+// TICKETS
+function rTix(){const P=E.filter(hasP).sort((a,b)=>a.lo-b.lo),mx=Math.max(...P.map(e=>e.lo)),fr=E.filter(e=>e.free),np=E.filter(e=>!hasP(e)&&!e.free);
+ $('s-tix').innerHTML=`<h2 style="margin-top:0">What it costs</h2><p class="sub">Lowest published ticket for each event that lists a price, in Kč per person. Higher categories and child prices are in the table.</p>
+ <div class="card"><div class="bars">${P.map(e=>`<div class="br"><span>${e.n}<span class="sub" style="display:block">${CATS[e.c]}</span></span><i style="width:${Math.max(3,e.lo/mx*100)}%"></i><em>${kc(e.lo)}</em></div>`).join('')}</div></div>
+ <h2>Every published price</h2><div class="card tw"><table><thead><tr><th>Event</th><th>Published</th><th class="n">Lowest</th><th class="n">Highest</th></tr></thead><tbody>${P.map(e=>`<tr><td>${e.n}</td><td>${e.pr}</td><td class="n">${kc(e.lo)}</td><td class="n">${kc(e.hi)}</td></tr>`).join('')}</tbody></table></div>
+ <h2>Free to enter</h2><div class="card"><ul style="margin:0;padding-left:20px">${fr.map(e=>`<li><b>${e.n}</b> <span class="sub">${e.w}</span></li>`).join('')}</ul></div>
+ <div class="warnbox"><b>${np.length} listings have no price in their source.</b> I did not guess a number for them. Use the Source button on each card, or the organiser's ticket page.<details style="margin-top:8px"><summary style="cursor:pointer">Show which ones</summary><p class="sub" style="margin:8px 0 0">${np.map(e=>e.n).join(', ')}</p></details></div>
+ <p class="note">Prices are copied from the sources on ${CHK}. Ticket resellers and booking fees can add to them.</p>`}
+// PLAN
+function rPlan(){const P=E.filter(hasP).sort((a,b)=>a.n.localeCompare(b.n)),{a,k,sc,hire,pick}=S.plan;
+ const lines=[];let tot=0;
+ P.filter(e=>pick.has(e.id)).forEach(e=>{const ad=sc==='lo'?e.lo:e.hi;let kid=e.ch!=null?e.ch:ad,flag=e.ch==null&&k>0;let h=0;if(hire&&e.hire)h=sc==='lo'?e.hire[0]:e.hire[1];const t=a*(ad+h)+k*(kid+h);tot+=t;lines.push({e,t,flag})});
+ const pp=(a+k)>0?tot/(a+k):0;
+ $('s-plan').innerHTML=`<h2 style="margin-top:0">Budget for a few days out</h2><p class="sub">Tick what you want to do. The planner uses published ticket prices only, so free events are not listed.</p>
+ <div class="card"><div class="two"><div class="f"><label for="pa">Adults</label><input id="pa" type="number" inputmode="numeric" min="0" max="20" value="${a}"></div><div class="f"><label for="pk">Children</label><input id="pk" type="number" inputmode="numeric" min="0" max="20" value="${k}"></div></div>
+ <div class="f"><label for="ps">Ticket category</label><select id="ps"><option value="lo"${sc==='lo'?' selected':''}>Cheapest published ticket</option><option value="hi"${sc==='hi'?' selected':''}>Most expensive published ticket</option></select></div>
+ <label style="display:flex;gap:10px;align-items:center;min-height:44px"><input id="ph" type="checkbox"${hire?' checked':''} style="width:22px;height:22px"> Add skate hire for skating</label>
+ <div class="res"><div class="stat"><span>Total</span><b id="pt">${kc(tot)}</b></div><div class="stat"><span>Per person</span><b id="pp" style="color:var(--ink)">${kc(pp)}</b></div></div>
+ <div>${P.map(e=>`<label class="ck"><input type="checkbox" data-p="${e.id}"${pick.has(e.id)?' checked':''}><span><b>${e.n}</b><br><span class="sub">${e.pr}</span></span></label>`).join('')}</div>
+ ${lines.length?`<div class="tw" style="margin-top:12px"><table><tbody>${lines.map(l=>`<tr><td>${l.e.n}${l.flag?'<div class="sub">Child price not published, counted at the adult price.</div>':''}${l.e.x?`<div class="sub">${l.e.x}</div>`:''}</td><td class="n">${kc(l.t)}</td></tr>`).join('')}</tbody></table></div>`:'<p class="note">Nothing ticked yet.</p>'}
+ <p class="note">A range event such as the O2 Arena has seat categories: the low and high options show the two ends. Check the organiser for the seat you want.</p></div>`;
+ $('pa').oninput=e=>{const v=parseInt(e.target.value,10);if(v>=0&&v<=20){S.plan.a=v;rPlan();$('pa').focus()}};$('pk').oninput=e=>{const v=parseInt(e.target.value,10);if(v>=0&&v<=20){S.plan.k=v;rPlan();$('pk').focus()}};$('ps').onchange=e=>{S.plan.sc=e.target.value;rPlan()};$('ph').onchange=e=>{S.plan.hire=e.target.checked;rPlan()};
+ document.querySelectorAll('[data-p]').forEach(c=>c.onchange=()=>{c.checked?S.plan.pick.add(c.dataset.p):S.plan.pick.delete(c.dataset.p);rPlan()})}
+// ABOUT
+function rAbout(){const SR=[...new Map(E.flatMap(e=>e.src).map(s=>[s[1],s])).values()];
+ $('s-about').innerHTML=`<h2 style="margin-top:0">How this is built</h2><div class="card"><p style="margin-top:0"><b>Events, dates, venues and prices</b> are copied from the published pages listed below, as they stood on ${CHK}. Each card has a Source button.</p><p><b>No guessing.</b> If a source gave no price, the card says "No price found". If sources disagreed, the card says so (Republic Square market end date, the Advent concert venue, the Banksy end date).</p><p><b>Not included:</b> tree-lighting date and time (not in any source I could read), the Puccini season on 19 Nov (the source gave no venue), sport (I could not confirm fixtures), and the full club programme beyond late November, because the concert calendars only loaded their first pages. Small-venue gigs are listed for 15–23 Nov and for headline dates after that.</p><p><b>Distances</b> use approximate venue coordinates (small clubs have none) and a straight line, with walking time at about 80 m per minute plus 30% for streets. Some events have no coordinates because the source gave no place.</p><p style="margin-bottom:0"><b>Calendar files</b> add the event with a reminder one hour before. Times follow the source; when only a start time is given I assume two hours.</p></div>
+ <h2>Sources</h2><div class="card"><ul style="margin:0;padding-left:20px">${SR.map(s=>`<li><a href="${s[1]}" target="_blank" rel="noopener">${s[0]}</a></li>`).join('')}</ul></div>
+ <p class="note">Not affiliated with any organiser or venue. Always confirm times and tickets with the organiser.</p>`}
+// controls
+$('loc').onclick=()=>{if(!navigator.geolocation)return;$('loc').textContent='…';navigator.geolocation.getCurrentPosition(p=>{S.loc=[p.coords.latitude,p.coords.longitude];$('loc').textContent='Near me ✓';rFind();rCal()},()=>{$('loc').textContent='Near me'},{enableHighAccuracy:false,timeout:10000,maximumAge:300000})};
+$('th').onclick=()=>{const r=document.documentElement,d=r.getAttribute('data-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'),n=d==='dark'?'light':'dark';r.setAttribute('data-theme',n);try{localStorage.setItem('pet-theme',n)}catch(e){}};
+try{const t=localStorage.getItem('pet-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}
+rFind();rCal();rTix();rPlan();rAbout();
+const h0=(location.hash||'').slice(1);go(TABS.map(t=>t[0]).includes(h0)?h0:'find');
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
